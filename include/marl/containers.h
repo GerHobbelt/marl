@@ -28,6 +28,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#undef min
+#undef max
+
 namespace marl {
 namespace containers {
 
@@ -134,7 +137,7 @@ class vector {
 
   vector(const vector&) = delete;
 
-  MARL_NO_EXPORT inline void free();
+  MARL_NO_EXPORT inline void free_();
 
   size_t count = 0;
   size_t capacity = BASE_CAPACITY;
@@ -168,13 +171,13 @@ vector<T, BASE_CAPACITY>::vector(
 
 template <typename T, int BASE_CAPACITY>
 vector<T, BASE_CAPACITY>::~vector() {
-  free();
+  free_();
 }
 
 template <typename T, int BASE_CAPACITY>
 vector<T, BASE_CAPACITY>& vector<T, BASE_CAPACITY>::operator=(
     const vector& other) {
-  free();
+  free_();
   reserve(other.size());
   count = other.size();
   for (size_t i = 0; i < count; i++) {
@@ -187,7 +190,7 @@ template <typename T, int BASE_CAPACITY>
 template <int BASE_CAPACITY_2>
 vector<T, BASE_CAPACITY>& vector<T, BASE_CAPACITY>::operator=(
     const vector<T, BASE_CAPACITY_2>& other) {
-  free();
+  free_();
   reserve(other.size());
   count = other.size();
   for (size_t i = 0; i < count; i++) {
@@ -200,7 +203,7 @@ template <typename T, int BASE_CAPACITY>
 template <int BASE_CAPACITY_2>
 vector<T, BASE_CAPACITY>& vector<T, BASE_CAPACITY>::operator=(
     vector<T, BASE_CAPACITY_2>&& other) {
-  free();
+  free_();
   reserve(other.size());
   count = other.size();
   for (size_t i = 0; i < count; i++) {
@@ -319,7 +322,7 @@ void vector<T, BASE_CAPACITY>::reserve(size_t n) {
       new (&reinterpret_cast<T*>(grown)[i])
           T(std::move(reinterpret_cast<T*>(elements)[i]));
     }
-    free();
+    free_();
     elements = grown;
     allocation = alloc;
   }
@@ -336,13 +339,13 @@ const T* vector<T, BASE_CAPACITY>::data() const {
 }
 
 template <typename T, int BASE_CAPACITY>
-void vector<T, BASE_CAPACITY>::free() {
+void vector<T, BASE_CAPACITY>::free_() {
   for (size_t i = 0; i < count; i++) {
     reinterpret_cast<T*>(elements)[i].~T();
   }
 
   if (allocation.ptr != nullptr) {
-    allocator->free(allocation);
+    allocator->free_(allocation);
     allocation = {};
     elements = nullptr;
   }
@@ -458,7 +461,7 @@ list<T>::~list() {
   auto curr = allocations;
   while (curr != nullptr) {
     auto next = curr->next;
-    allocator->free(curr->allocation);
+    allocator->free_(curr->allocation);
     curr = next;
   }
 }

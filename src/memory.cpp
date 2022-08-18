@@ -222,7 +222,7 @@ class DefaultAllocator : public marl::Allocator {
     return allocation;
   }
 
-  virtual void free(const marl::Allocation& allocation) override {
+  virtual void free_(const marl::Allocation& allocation) override {
     if (allocation.request.useGuards) {
       ::pagedFree(allocation.ptr, allocation.request.alignment,
                   allocation.request.size, true, true);

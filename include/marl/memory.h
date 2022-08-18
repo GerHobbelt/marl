@@ -118,7 +118,7 @@ class Allocator {
 
   // free() frees the memory returned by allocate().
   // The Allocation must have all fields equal to those returned by allocate().
-  virtual void free(const Allocation&) = 0;
+  virtual void free_(const Allocation&) = 0;
 
   // create() allocates and constructs an object of type T, respecting the
   // alignment of the type.
@@ -166,7 +166,7 @@ void Allocator::Deleter::operator()(T* object) {
   allocation.request.size = sizeof(T) * count;
   allocation.request.alignment = alignof(T);
   allocation.request.usage = Allocation::Usage::Create;
-  allocator->free(allocation);
+  allocator->free_(allocation);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -193,7 +193,7 @@ void Allocator::destroy(T* object) {
   alloc.request.size = sizeof(T);
   alloc.request.alignment = alignof(T);
   alloc.request.usage = Allocation::Usage::Create;
-  free(alloc);
+  free_(alloc);
 }
 
 template <typename T, typename... ARGS>
@@ -265,7 +265,7 @@ class TrackedAllocator : public Allocator {
 
   // Allocator compliance
   inline Allocation allocate(const Allocation::Request&) override;
-  inline void free(const Allocation&) override;
+  inline void free_(const Allocation&) override;
 
  private:
   Allocator* const allocator;
@@ -307,7 +307,7 @@ Allocation TrackedAllocator::allocate(const Allocation::Request& request) {
   return allocator->allocate(request);
 }
 
-void TrackedAllocator::free(const Allocation& allocation) {
+void TrackedAllocator::free_(const Allocation& allocation) {
   {
     std::unique_lock<std::mutex> lock(mutex);
     auto& usageStats = stats_.byUsage[int(allocation.request.usage)];
@@ -318,7 +318,7 @@ void TrackedAllocator::free(const Allocation& allocation) {
     --usageStats.count;
     usageStats.bytes -= allocation.request.size;
   }
-  return allocator->free(allocation);
+  return allocator->free_(allocation);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -417,7 +417,7 @@ void StlAllocator<T>::deallocate(T* p, std::size_t n) {
   Allocation alloc;
   alloc.ptr = p;
   alloc.request = request(n);
-  allocator->free(alloc);
+  allocator->free_(alloc);
 }
 
 template <typename T>

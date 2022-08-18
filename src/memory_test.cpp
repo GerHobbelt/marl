@@ -41,7 +41,7 @@ TEST_F(AllocatorTest, AlignedAllocate) {
         ASSERT_EQ(reinterpret_cast<uintptr_t>(ptr) & (alignment - 1), 0U);
         memset(ptr, 0,
                size);  // Check the memory was actually allocated.
-        allocator->free(allocation);
+        allocator->free_(allocation);
       }
     }
   }
