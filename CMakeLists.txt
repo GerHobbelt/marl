@@ -46,6 +46,7 @@ option_if_not_defined(MARL_BUILD_EXAMPLES "Build example applications" OFF)
 option_if_not_defined(MARL_BUILD_TESTS "Build tests" OFF)
 option_if_not_defined(MARL_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option_if_not_defined(MARL_BUILD_SHARED "Build marl as a shared / dynamic library (default static)" OFF)
+option_if_not_defined(MARL_USE_PTHREAD_THREAD_LOCAL "Use pthreads for thread local storage" OFF)
 option_if_not_defined(MARL_ASAN "Build marl with address sanitizer" OFF)
 option_if_not_defined(MARL_MSAN "Build marl with memory sanitizer" OFF)
 option_if_not_defined(MARL_TSAN "Build marl with thread sanitizer" OFF)
@@ -170,6 +171,7 @@ if(NOT MSVC)
         ${MARL_SRC_DIR}/osfiber_rv64.c
         ${MARL_SRC_DIR}/osfiber_x64.c
         ${MARL_SRC_DIR}/osfiber_x86.c
+        ${MARL_SRC_DIR}/osfiber_emscripten.cpp
     )
     # CMAKE_OSX_ARCHITECTURES settings aren't propagated to assembly files when
     # building for Apple platforms (https://gitlab.kitware.com/cmake/cmake/-/issues/20771),
@@ -223,6 +225,11 @@ function(marl_set_target_options target)
             target_compile_options(${target} PRIVATE "-Werror")
         endif()
     endif(MARL_WARNINGS_AS_ERRORS)
+
+    if(MARL_USE_PTHREAD_THREAD_LOCAL)
+        target_compile_definitions(${target} PRIVATE "MARL_USE_PTHREAD_THREAD_LOCAL=1")
+        target_link_libraries(${target} PUBLIC pthread)
+    endif()
 
     if(MARL_ASAN)
         target_compile_options(${target} PUBLIC "-fsanitize=address")
