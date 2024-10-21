@@ -25,9 +25,9 @@
 
 class Schedule : public benchmark::Fixture {
  public:
-  void SetUp(const ::benchmark::State&) {}
+  void SetUp(::benchmark::State&) override {}
 
-  void TearDown(const ::benchmark::State&) {}
+  void TearDown(::benchmark::State&) override {}
 
   // run() creates a scheduler using the config cfg, sets the number of worker
   // threads from the benchmark arguments, calls f, then unbinds and destructs
