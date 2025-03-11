@@ -50,13 +50,13 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
     COMMON_CMAKE_FLAGS+=" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}"
 
     if [ "$BUILD_TOOLCHAIN" == "ndk" ]; then
-        using ndk-r21d
+        using ndk-r27c
         COMMON_CMAKE_FLAGS+=" -DANDROID_ABI=$BUILD_TARGET_ARCH"
         COMMON_CMAKE_FLAGS+=" -DANDROID_NATIVE_API_LEVEL=18"
         COMMON_CMAKE_FLAGS+=" -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
     else # !ndk
         if [ "$BUILD_TOOLCHAIN" == "clang" ]; then
-            using clang-10.0.0
+            using clang-13.0.1
         fi
         if [ "$BUILD_TARGET_ARCH" == "x86" ]; then
             COMMON_CMAKE_FLAGS+=" -DCMAKE_CXX_FLAGS=-m32"
